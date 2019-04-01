@@ -1,6 +1,8 @@
 defmodule Ltiex.Internal do
   @moduledoc false
 
+  @exclude_params ["format", "realm", "oauth_signature"]
+
   @doc """
   Decode OAuth params from an Authorization header string
 
@@ -46,4 +48,50 @@ defmodule Ltiex.Internal do
     |> Map.put(:query, nil)
     |> URI.to_string()
   end
+
+  @doc """
+  Encode the params map into a single string as per LTI encoding rules.
+
+  Certain protected keys are filtered out like "oauth_signature", which is not
+  used in the digest generation.
+
+  ## Examples
+
+      iex> Ltiex.Internal.encode_lti_form([{"foo","hello world!"}, {"bar", "test"}])
+      {:ok, "bar=test&foo=hello%20world%21"}
+
+      iex> Ltiex.Internal.encode_lti_form(%{"oauth_signature" => "IL+2=", "foo" => "bar+"})
+      {:ok, "foo=bar%2B"}
+
+  """
+  @spec encode_lti_form(map) :: {:ok, String.t()} | {:error, :invalid_param}
+  def encode_lti_form(params) do
+    try do
+      encoded =
+        params
+        |> Enum.filter(&(!Enum.member?(@exclude_params, elem(&1, 0))))
+        |> Enum.map(&encode_param!/1)
+        |> Enum.sort()
+        |> Enum.join("&")
+
+      {:ok, encoded}
+    catch
+      :invalid_param ->
+        {:error, :invalid_param}
+    end
+  end
+
+  defp encode_param!({key, value}) when key != nil and value != nil do
+    encoded_value =
+      value
+      |> to_string()
+      |> URI.encode_www_form()
+
+    # Replace '+' characters with the actual percent encoding value: '%20'
+    # This has to be done has Elixir's `URI.encode_www_form` encodes spaces as
+    # '+', instead of the old percent encoded '%20' character.
+    Regex.replace(~r/\+/, "#{key}=#{encoded_value}", "%20")
+  end
+
+  defp encode_param!(_), do: throw(:invalid_param)
 end
