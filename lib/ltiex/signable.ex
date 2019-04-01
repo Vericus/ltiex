@@ -2,20 +2,79 @@ defprotocol Ltiex.Signable do
   @moduledoc """
   Protocol used as a base for generating LTI signatures.
 
-  Implement this protocol for structs/
-  """
-  alias Ltiex.Request
+  Implement this protocol for structs from which an `Ltiex.Request.t` struct can
+  be parsed. The `Ltiex.Request.t` struct validates all the required information
+  is present for generating an OAuth LTI signature.
 
+  ## Available Implementations
+
+  The library implements this protocol for a Map, the Request struct itself, and
+  the `Plug.Conn.t` struct. 
+
+  ### `Map`
+
+  A map is signable if it has the keys needed in a `%Request{}`. A basic runtime
+  type check is performed for the values.
+
+  ### `Ltiex.Request`
+
+  An identity implementation.
+
+  ### `Plug.Conn`
+
+  The Signable implementation for `t:Plug.Conn.t/0` is useful for verifying
+  incoming LTI requests.
+
+  The `:method` value is picked directly from the parent `Conn` value.
+
+  The `:params` map is either extracted from the fetched `Conn` body and query or
+  the request headers depending on the `content-type` request header value:
+
+  * If the `content-type` request header is one of `application/xml` or
+    `application/json`, the LTI params are parsed from the OAuth `authorization`
+    header: For example: 
+
+    ```http
+    Content-Type: application/xml
+    Authorization: OAuth realm="",oauth_signature="...",oauth_body_hash=".."
+    ```
+    
+    For such a request, the keys `oauth_signature` and `oauth_body_hash` are
+    required. The query params are discarded.
+
+  * If the `content-type` request header is `x-www-form-urlencoded` or the Conn
+    body params are fetched and available as a map, the LTI params are parsed
+    from that directly. Additionally, the URL query params are merged with the
+    body params.
+
+  The `url` value is computed using `Plug.Conn.request_url/1`. Additionally if
+  there is a request header `x-forwarded-proto` present which provides the
+  actual request scheme (usually from the load balancer), it will be used
+  instead of the Conn's `:scheme`.
+
+  """
   @type t :: Signable.t()
 
-  @spec request(t) :: {:ok, Request.t()} | {:error, term}
+  @doc """
+  Extract a `Ltiex.Request` struct from the underlying struct.
+
+  Should return `{:ok, request_struct}` on success or fail with any error tuple.
+  """
+  @spec request(t) :: {:ok, Ltiex.Request.t()} | {:error, term}
   def request(signable)
 end
 
 defimpl Ltiex.Signable, for: Map do
+  alias Ltiex.Request
+
+  def request(%{"params" => ps, "url" => url, "method" => m})
+      when is_map(ps) and is_binary(url) and m in ["POST", "GET"] do
+    {:ok, %Request{params: ps, url: url, method: m}}
+  end
+
   def request(%{params: ps, url: url, method: m})
       when is_map(ps) and is_binary(url) and m in ["POST", "GET"] do
-    {:ok, %Ltiex.Request{params: ps, url: url, method: m}}
+    {:ok, %Request{params: ps, url: url, method: m}}
   end
 
   def request(_), do: {:error, :invalid_request}

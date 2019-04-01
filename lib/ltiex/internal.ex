@@ -1,7 +1,5 @@
 defmodule Ltiex.Internal do
-  @moduledoc """
-  Internal helper functions.
-  """
+  @moduledoc false
 
   @doc """
   Decode OAuth params from an Authorization header string

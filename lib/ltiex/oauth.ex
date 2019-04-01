@@ -1,7 +1,12 @@
 defmodule Ltiex.OAuth do
   @moduledoc """
-  LTI v1.1 request signing and verification using the OAuth v1 flavour
-  recommended by LTI.
+  LTI v1.1 request signing and verification using the OAuth flavour used in the
+  LTI protocol.
+
+  OAuth Signatures are generated on a complete `t:Ltiex.Request.t/0` struct with
+  a given secret. These request structs can be created directly or through
+  implementing the `Ltiex.Signable` for other data types. See `Ltiex.Signable`
+  for more details.
   """
   alias Ltiex.Request
 
@@ -10,9 +15,10 @@ defmodule Ltiex.OAuth do
   ## API
 
   @doc """
-  Compute a signature for a request in a Plug Conn struct.
+  Compute the LTI signature for a request.
 
-  On a successful signing, returns {:ok, parsed_signature, computed_signature}.
+  On a successful signing, returns {:ok, parsed_signature, computed_signature},
+  which can be used for request verification through an equality comparison.
   """
   @spec signature(Request.t(), String.t()) :: {:ok, String.t(), String.t()} | {:error, term}
   def signature(%Request{url: url, method: method, params: params}, secret) do

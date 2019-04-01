@@ -29,7 +29,10 @@ def deps do
 end
 ```
 
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at [https://hexdocs.pm/ltiex](https://hexdocs.pm/ltiex).
+## Documentation
 
+Generate the documentation locally with:
+
+    mix docs
+
+Alternatively browse documentation in-line, starting with the main `Ltiex` module.
