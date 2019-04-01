@@ -4,10 +4,10 @@ defmodule Ltiex do
 
   ## Signature computation
 
-  Most of the functions work with structs implmenting the `Ltiex.Signable`
-  protocol. Implmentations for a standard key-value `Map`, `Plug.Conn`, and
-  `Ltiex.Request` structs are provided. Alternatively, the `t:Ltiex.Request.t/0`
-  values can be created directly.
+  Most of the signature computation functions work on structs implementing the
+  `Ltiex.Signable` protocol. Default implementations for the standard key-value
+  `Map`, `Plug.Conn`, and `Ltiex.Request` structs are provided. Alternatively,
+  the `t:Ltiex.Request.t/0` values can be created directly.
 
   To generate a signature on a *Signable* value, use `sign/2` directly. This
   provides both the parsed and computed signatures which can be compared. To
