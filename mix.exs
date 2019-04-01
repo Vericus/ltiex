@@ -7,7 +7,15 @@ defmodule Ltiex.MixProject do
       version: "0.1.0",
       elixir: "~> 1.8",
       start_permanent: Mix.env() == :prod,
-      deps: deps()
+      deps: deps(),
+      # Docs
+      name: "Ltiex",
+      source_url: "https://github.com/Vericus/ltiex",
+      docs: [
+        # The main page in the docs
+        main: "Ltiex",
+        extras: ["README.md"]
+      ]
     ]
   end
 
@@ -21,7 +29,8 @@ defmodule Ltiex.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:plug, "~> 1.7"}
+      {:plug, "~> 1.7"},
+      {:ex_doc, "~> 0.19", only: :dev, runtime: false}
     ]
   end
 end

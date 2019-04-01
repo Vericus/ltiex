@@ -93,7 +93,7 @@ defimpl Ltiex.Signable, for: Plug.Conn do
   def parse_request(conn, :header) do
     with [hd] when is_binary(hd) <- get_req_header(conn, "authorization"),
          %{"oauth_body_hash" => _, "oauth_signature" => _} = params <-
-           Internal.parse_oauth_params(hd) do
+           Internal.oauth_header_params(hd) do
       # The query params are discarded
       url =
         conn

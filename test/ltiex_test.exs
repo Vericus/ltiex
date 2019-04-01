@@ -1,8 +1,6 @@
-defmodule Ltiex.OAuthTest do
+defmodule LtiexTest do
   use ExUnit.Case, async: true
   use Plug.Test
-
-  alias Ltiex.OAuth
 
   @uri "http://localhost:5000/api/lti/1p0/outcome"
   @secret "5b8e17f4cb083"
@@ -19,7 +17,7 @@ defmodule Ltiex.OAuthTest do
       |> put_req_header("content-type", "application/xml")
       |> put_req_header("authorization", header)
 
-    assert {:ok, ^signature, ^signature} = OAuth.signature(test_conn, @secret)
+    assert {:ok, ^signature, ^signature} = Ltiex.sign(test_conn, @secret)
   end
 
   test "rejects malformed application/xml message headers" do
@@ -33,7 +31,7 @@ defmodule Ltiex.OAuthTest do
       |> put_req_header("content-type", "application/xml")
       |> put_req_header("authorization", header)
 
-    assert {:error, :invalid_request} = OAuth.signature(test_conn, @secret)
+    assert {:error, :invalid_request} = Ltiex.sign(test_conn, @secret)
 
     # No Oauth signature
     header =
@@ -45,6 +43,6 @@ defmodule Ltiex.OAuthTest do
       |> put_req_header("content-type", "application/xml")
       |> put_req_header("authorization", header)
 
-    assert {:error, :invalid_request} = OAuth.signature(test_conn, @secret)
+    assert {:error, :invalid_request} = Ltiex.sign(test_conn, @secret)
   end
 end
