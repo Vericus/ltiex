@@ -58,9 +58,10 @@ defprotocol Ltiex.Signable do
   @doc """
   Extract a `Ltiex.Request` struct from the underlying struct.
 
-  Should return `{:ok, request_struct}` on success or fail with any error tuple.
+  Should return `{:ok, request_struct}` on success or fail with error 2-3 tuples.
   """
-  @spec request(t) :: {:ok, Ltiex.Request.t()} | {:error, term}
+  @spec request(t) ::
+          {:ok, Ltiex.Request.t()} | {:error, :parse_error} | {:error, :parse_error, binary}
   def request(signable)
 end
 
@@ -77,7 +78,7 @@ defimpl Ltiex.Signable, for: Map do
     {:ok, %Request{params: ps, url: url, method: m}}
   end
 
-  def request(_), do: {:error, :invalid_request}
+  def request(_), do: {:error, :parse_error, "missing keys"}
 end
 
 defimpl Ltiex.Signable, for: Plug.Conn do
@@ -125,7 +126,7 @@ defimpl Ltiex.Signable, for: Plug.Conn do
   def parse_request(conn, :body) do
     case conn.params do
       %Conn.Unfetched{} ->
-        {:error, :invalid_request}
+        {:error, :parse_error, "Conn params are not fetched"}
 
       %{} = params ->
         url =
@@ -161,8 +162,11 @@ defimpl Ltiex.Signable, for: Plug.Conn do
 
       {:ok, %Request{method: conn.method, params: params, url: url}}
     else
-      _ ->
-        {:error, :invalid_request}
+      [] ->
+        {:error, :parse_error, "malformed headers"}
+
+      %{} ->
+        {:error, :parse_error, "missing oauth params"}
     end
   end
 

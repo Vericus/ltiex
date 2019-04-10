@@ -16,23 +16,26 @@ defmodule Ltiex.OAuth do
   @doc """
   Compute the LTI signature for a request.
 
-  On a successful signing, returns {:ok, parsed_signature, computed_signature},
+  On a successful signing, returns `{:ok, parsed_signature, computed_signature}`,
   which can be used for request verification through an equality comparison.
   """
-  @spec signature(Request.t(), String.t()) :: {:ok, String.t(), String.t()} | {:error, term}
-  def signature(%Request{url: url, method: method, params: params}, secret) do
-    with {:ok, encoded_params} <- Internal.encode_lti_form(params) do
-      message =
-        [method, url, encoded_params]
-        |> Enum.map(&URI.encode_www_form/1)
-        |> Enum.join("&")
+  @spec signature(Request.t(), binary) :: {:ok, binary(), binary()} | {:error, :invalid_request}
+  def signature(%Request{url: url, method: method, params: params}, secret)
+      when is_binary(secret) do
+    encoded_params = Internal.encode_lti_form(params)
 
-      signature =
-        :sha
-        |> :crypto.hmac(secret <> "&", message)
-        |> Base.encode64()
+    message =
+      [method, url, encoded_params]
+      |> Enum.map(&URI.encode_www_form/1)
+      |> Enum.join("&")
 
-      {:ok, Map.get(params, "oauth_signature"), signature}
-    end
+    signature =
+      :sha
+      |> :crypto.hmac(secret <> "&", message)
+      |> Base.encode64()
+
+    {:ok, Map.get(params, "oauth_signature"), signature}
   end
+
+  def signature(_, _), do: {:error, :invalid_request}
 end

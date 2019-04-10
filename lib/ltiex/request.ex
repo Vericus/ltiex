@@ -5,7 +5,7 @@ defmodule Ltiex.Request do
   """
   @enforce_keys [:url, :method, :params]
   @type t :: %__MODULE__{url: String.t(), method: String.t(), params: map}
-  defstruct [:url, :method, :params]
+  defstruct [:url, :method, params: %{}]
 end
 
 defimpl Ltiex.Signable, for: Ltiex.Request do

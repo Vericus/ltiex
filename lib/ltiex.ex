@@ -17,12 +17,15 @@ defmodule Ltiex do
   alias Ltiex.Signable
   alias Ltiex.OAuth
 
+  @type error_type :: :invalid_request | :parse_error | :signature_mismatch
+  @type error :: {:error, error_type} | {:error, error_type, binary}
+
   @doc """
   Generate a LTI signature.
 
   On success, returns `{:ok, parsed, computed}`.
   """
-  @spec sign(Signable.t(), String.t()) :: {:ok, String.t(), String.t()} | {:error, term}
+  @spec sign(Signable.t(), binary) :: {:ok, binary, binary} | error
   def sign(signable, secret) do
     with {:ok, request} <- Signable.request(signable) do
       OAuth.signature(request, secret)
@@ -32,8 +35,7 @@ defmodule Ltiex do
   @doc """
   Verify the LTI signature for a Signable value.
   """
-  @spec verify(Signable.t(), String.t()) ::
-          {:ok, Signable.t()} | {:error, :signature_mismatch} | {:error, term}
+  @spec verify(Signable.t(), binary) :: {:ok, Signable.t()} | error
   def verify(signable, secret) do
     with {:ok, parsed, computed} <- sign(signable, secret) do
       if parsed === computed do

@@ -15,9 +15,10 @@ defmodule Ltiex.Internal do
       %{"oauth_signature" => "ILd=", "oauth_version" => "1.0"}
 
       iex> Ltiex.Internal.oauth_header_params(~s(Header something))
-      nil
+      %{}
 
   """
+  @spec oauth_header_params(binary) :: %{optional(binary()) => binary()}
   def oauth_header_params(header)
 
   def oauth_header_params("OAuth " <> header) do
@@ -27,7 +28,7 @@ defmodule Ltiex.Internal do
     |> URI.decode_query()
   end
 
-  def oauth_header_params(_), do: nil
+  def oauth_header_params(_), do: %{}
 
   @doc """
   Strip the query params from a uri.
@@ -41,7 +42,7 @@ defmodule Ltiex.Internal do
       "https://localhost:4000/api/lti/"
 
   """
-  @spec strip_uri_query(String.t() | URI.t()) :: String.t()
+  @spec strip_uri_query(binary() | URI.t()) :: binary()
   def strip_uri_query(uri) do
     uri
     |> URI.parse()
@@ -58,30 +59,25 @@ defmodule Ltiex.Internal do
   ## Examples
 
       iex> Ltiex.Internal.encode_lti_form([{"foo","hello world!"}, {"bar", "test"}])
-      {:ok, "bar=test&foo=hello%20world%21"}
+      "bar=test&foo=hello%20world%21"
 
       iex> Ltiex.Internal.encode_lti_form(%{"oauth_signature" => "IL+2=", "foo" => "bar+"})
-      {:ok, "foo=bar%2B"}
+      "foo=bar%2B"
+
+      iex> Ltiex.Internal.encode_lti_form(%{"bad_param" => nil})
+      "bad_param="
 
   """
-  @spec encode_lti_form(map) :: {:ok, String.t()} | {:error, :invalid_param}
+  @spec encode_lti_form(%{optional(binary) => binary}) :: binary()
   def encode_lti_form(params) do
-    try do
-      encoded =
-        params
-        |> Enum.filter(&(!Enum.member?(@exclude_params, elem(&1, 0))))
-        |> Enum.map(&encode_param!/1)
-        |> Enum.sort()
-        |> Enum.join("&")
-
-      {:ok, encoded}
-    catch
-      :invalid_param ->
-        {:error, :invalid_param}
-    end
+    params
+    |> Enum.filter(&(!Enum.member?(@exclude_params, elem(&1, 0))))
+    |> Enum.map(&encode_param/1)
+    |> Enum.sort()
+    |> Enum.join("&")
   end
 
-  defp encode_param!({key, value}) when key != nil and value != nil do
+  defp encode_param({key, value}) do
     encoded_value =
       value
       |> to_string()
@@ -92,6 +88,4 @@ defmodule Ltiex.Internal do
     # '+', instead of the old percent encoded '%20' character.
     Regex.replace(~r/\+/, "#{key}=#{encoded_value}", "%20")
   end
-
-  defp encode_param!(_), do: throw(:invalid_param)
 end

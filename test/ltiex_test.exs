@@ -18,6 +18,7 @@ defmodule LtiexTest do
       |> put_req_header("authorization", header)
 
     assert {:ok, ^signature, ^signature} = Ltiex.sign(test_conn, @secret)
+    assert {:ok, ^test_conn} = Ltiex.verify(test_conn, @secret)
   end
 
   test "rejects malformed application/xml message headers" do
@@ -31,7 +32,7 @@ defmodule LtiexTest do
       |> put_req_header("content-type", "application/xml")
       |> put_req_header("authorization", header)
 
-    assert {:error, :invalid_request} = Ltiex.sign(test_conn, @secret)
+    assert {:error, :parse_error, "missing oauth params"} = Ltiex.sign(test_conn, @secret)
 
     # No Oauth signature
     header =
@@ -43,6 +44,6 @@ defmodule LtiexTest do
       |> put_req_header("content-type", "application/xml")
       |> put_req_header("authorization", header)
 
-    assert {:error, :invalid_request} = Ltiex.sign(test_conn, @secret)
+    assert {:error, :parse_error, "missing oauth params"} = Ltiex.sign(test_conn, @secret)
   end
 end
