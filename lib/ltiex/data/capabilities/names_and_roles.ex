@@ -1,4 +1,4 @@
-defmodule Ltiex.Data.Capabilites.Membership do
+defmodule Ltiex.Data.Capabilites.NamesRoles do
   @type t :: %__MODULE__{
           url: String.t(),
           version: String.t()
@@ -6,7 +6,7 @@ defmodule Ltiex.Data.Capabilites.Membership do
   @enforce_keys [:url, :version]
   defstruct [:url, :version]
 
-  def get_scope(%Membership{version: "2.0"}),
+  def get_scope(%NamesRoles{version: "2.0"}),
     do: "https://purl.imsglobal.org/spec/lti-nrps/scope/contextmembership.readonly"
 
   def get_scope(_), do: nil

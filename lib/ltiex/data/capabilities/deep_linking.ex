@@ -1,4 +1,4 @@
-defmodule Ltiex.Data.DeepLinking do
+defmodule Ltiex.Data.Capabilities.DeepLinking do
   @type t :: %__MODULE__{
           return_url: String.t(),
           accept_types: [String.t(), ...],
