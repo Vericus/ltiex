@@ -7,7 +7,7 @@ defmodule Ltiex.Data.User do
           family_name: String.t() | nil,
           email: String.t() | nil,
           image: String.t() | nil,
-          roles: [String.t()],
+          roles: [String.t(), ...],
           role_scope_mentor: [String.t()] | nil
         }
   @enforce_keys [:id]
