@@ -173,15 +173,22 @@ defimpl Ltiex.Signable, for: Plug.Conn do
   # Get the request URL, considering any proxied request headers from a load
   # balancer
   defp proxy_request_url(%Conn{scheme: scheme} = conn) do
-    final_scheme =
+    {final_scheme, final_port} =
       case get_req_header(conn, "x-forwarded-proto") do
-        [proxy_scheme | _] when proxy_scheme in ["http", "https"] -> proxy_scheme
-        _ -> Atom.to_string(scheme)
+        ["https" | _] ->
+          {"https", 443}
+
+        ["http" | _] ->
+          {"http", 80}
+
+        _ ->
+          {Atom.to_string(scheme), conn.port}
       end
 
     conn
     |> request_url
     |> URI.parse()
+    |> Map.put(:port, final_port)
     |> Map.put(:scheme, final_scheme)
     |> URI.to_string()
   end

@@ -17,8 +17,22 @@ defmodule LtiexTest do
       |> put_req_header("content-type", "application/xml")
       |> put_req_header("authorization", header)
 
+    {:ok, req} = Ltiex.Signable.request(test_conn)
+    assert req.url === @uri
     assert {:ok, ^signature, ^signature} = Ltiex.sign(test_conn, @secret)
     assert {:ok, ^test_conn} = Ltiex.verify(test_conn, @secret)
+  end
+
+  test "Computed LTI request URL is the same as the request URL" do
+    # If a request is proxied from the original HTTPs request  
+    test_conn =
+      :post
+      |> conn("http://api.domain.io/test/lti/launch")
+      |> put_req_header("x-forwarded-proto", "https")
+
+    # The url should not contain port
+    {:ok, req} = Ltiex.Signable.request(test_conn)
+    assert req.url === "https://api.domain.io/test/lti/launch"
   end
 
   test "rejects malformed application/xml message headers" do
