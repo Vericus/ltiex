@@ -4,8 +4,8 @@ defmodule Ltiex.MixProject do
   def project do
     [
       app: :ltiex,
-      version: "0.1.0",
-      elixir: "~> 1.8",
+      version: "1.0.0",
+      elixir: "~> 1.12",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       # Docs
@@ -29,8 +29,8 @@ defmodule Ltiex.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:plug, "~> 1.7"},
-      {:ex_doc, "~> 0.19", only: :dev, runtime: false}
+      {:plug, "~> 1.10"},
+      {:ex_doc, "~> 0.22", only: :dev, runtime: false}
     ]
   end
 end
