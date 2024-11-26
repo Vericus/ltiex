@@ -39,11 +39,5 @@ defmodule Ltiex.OAuth do
 
   def signature(_, _), do: {:error, :invalid_request}
 
-  # Taken from :plug_crypto to accomodate :crypto's breaking change
-  # TODO: remove when we require OTP 22.1
-  if Code.ensure_loaded?(:crypto) and function_exported?(:crypto, :mac, 4) do
-    defp hmac(digest, key, data), do: :crypto.mac(:hmac, digest, key, data)
-  else
-    defp hmac(digest, key, data), do: :crypto.hmac(digest, key, data)
-  end
+  defp hmac(digest, key, data), do: :crypto.mac(:hmac, digest, key, data)
 end
