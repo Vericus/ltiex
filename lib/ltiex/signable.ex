@@ -9,7 +9,7 @@ defprotocol Ltiex.Signable do
   ## Available Implementations
 
   The library implements this protocol for a Map, the Request struct itself, and
-  the `Plug.Conn.t` struct. 
+  the `Plug.Conn.t` struct.
 
   ### `Map`
 
@@ -32,13 +32,13 @@ defprotocol Ltiex.Signable do
 
   * If the `content-type` request header is one of `application/xml` or
     `application/json`, the LTI params are parsed from the OAuth `authorization`
-    header: For example: 
+    header: For example:
 
     ```http
     Content-Type: application/xml
     Authorization: OAuth realm="",oauth_signature="...",oauth_body_hash=".."
     ```
-    
+
     For such a request, the keys `oauth_signature` and `oauth_body_hash` are
     required. The query params are discarded.
 
@@ -91,7 +91,7 @@ defimpl Ltiex.Signable, for: Plug.Conn do
   def request(conn) do
     conn
     |> get_req_header("content-type")
-    |> Enum.at(0)
+    |> Enum.at(0, "")
     |> Plug.Conn.Utils.content_type()
     |> case do
       {:ok, "application", t, _} when t in ["xml", "json"] ->
