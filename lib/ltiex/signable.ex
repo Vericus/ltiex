@@ -53,7 +53,7 @@ defprotocol Ltiex.Signable do
   instead of the Conn's `:scheme`.
 
   """
-  @type t :: Signable.t()
+  @type t :: t()
 
   @doc """
   Extract a `Ltiex.Request` struct from the underlying struct.
