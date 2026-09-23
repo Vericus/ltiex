@@ -30,7 +30,8 @@ defmodule Ltiex.OAuth do
       |> Enum.join("&")
 
     signature =
-      :sha
+      params
+      |> signature_method()
       |> hmac(secret <> "&", message)
       |> Base.encode64()
 
@@ -38,6 +39,9 @@ defmodule Ltiex.OAuth do
   end
 
   def signature(_, _), do: {:error, :invalid_request}
+
+  def signature_method(%{"oauth_signature_method" => "HMAC-SHA1"}), do: :sha
+  def signature_method(%{"oauth_signature_method" => "HMAC-SHA256"}), do: :sha256
 
   defp hmac(digest, key, data), do: :crypto.mac(:hmac, digest, key, data)
 end
