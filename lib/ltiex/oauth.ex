@@ -40,8 +40,8 @@ defmodule Ltiex.OAuth do
 
   def signature(_, _), do: {:error, :invalid_request}
 
-  def signature_method(%{"oauth_signature_method" => "HMAC-SHA1"}), do: :sha
   def signature_method(%{"oauth_signature_method" => "HMAC-SHA256"}), do: :sha256
+  def signature_method(_), do: :sha
 
   defp hmac(digest, key, data), do: :crypto.mac(:hmac, digest, key, data)
 end
